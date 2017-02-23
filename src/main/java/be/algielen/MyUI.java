@@ -1,16 +1,15 @@
 package be.algielen;
 
+import java.util.List;
+
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.HasComponents;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -25,26 +24,38 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("mytheme")
 public class MyUI extends UI {
 
+	private CustomerService service = CustomerService.getInstance();
+
+	private Grid<Customer> grid = new Grid<>();
+
 	@Override
 	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
 
-		final TextField name = new TextField();
-		name.setCaption("Type your name here:");
+		Button refresh = new Button("Refresh");
+		refresh.addClickListener(e -> updateList());
 
-		Button button = new Button("Click Me");
-		button.addClickListener(e -> {
-			layout.addComponent(new Label("Thanks " + name.getValue() + ", it works!"));
-		});
+		TextField searchfield = new TextField("Search");
+		searchfield.addValueChangeListener(e -> filterList(searchfield.getValue()));
 
-		layout.addComponents(name, button);
+		grid.addColumn(Customer::getFirstName).setCaption("First name");
+		grid.addColumn(Customer::getLastName).setCaption("Last name");
+		grid.addColumn(Customer::getEmail).setCaption("Email");
 
-		Button addNewButton = new Button("Click me if you dare");
-		addNewButton.addClickListener(new DuplicatingClickListener());
+		updateList();
 
-		layout.addComponent(addNewButton);
-
+		layout.addComponents(refresh, searchfield, grid);
 		setContent(layout);
+	}
+
+	void updateList() {
+		List<Customer> customers = service.findAll();
+		grid.setItems(customers);
+	}
+
+	void filterList(String filter) {
+		List<Customer> customers = service.findAll(filter);
+		grid.setItems(customers);
 	}
 
 	@WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
@@ -52,31 +63,4 @@ public class MyUI extends UI {
 	public static class MyUIServlet extends VaadinServlet {
 	}
 
-	private class DuplicatingClickListener implements Button.ClickListener {
-
-		@Override
-		public void buttonClick(Button.ClickEvent clickEvent) {
-			Button sourceButton = clickEvent.getButton();
-			Button newButton = new Button(sourceButton.getCaption());
-			newButton.addClickListener(this);
-			if (clickEvent.isAltKey()) {
-				HasComponents parent = sourceButton.getParent();
-				if (parent instanceof VerticalLayout) {
-					VerticalLayout verticalLayout = (VerticalLayout) parent;
-					int originalIndex = verticalLayout.getComponentIndex(sourceButton);
-					verticalLayout.removeComponent(sourceButton);
-					HorizontalLayout horizontalLayout = new HorizontalLayout();
-					horizontalLayout.addComponents(sourceButton, newButton);
-					verticalLayout.addComponent(horizontalLayout, originalIndex);
-				} else if (parent instanceof HorizontalLayout) {
-					((HorizontalLayout) parent).addComponent(newButton);
-				} else {
-					System.out.println("Parent not supported : " + parent.getClass());
-				}
-			} else {
-                VerticalLayout ancestor = sourceButton.findAncestor(VerticalLayout.class);
-                ancestor.addComponent(newButton);
-            }
-		}
-	}
 }
