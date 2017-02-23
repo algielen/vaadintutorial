@@ -6,10 +6,13 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -32,11 +35,15 @@ public class MyUI extends UI {
 	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
 
-		Button refresh = new Button("Refresh");
-		refresh.addClickListener(e -> updateList());
+		final HorizontalLayout toolbar = new HorizontalLayout();
 
-		TextField searchfield = new TextField("Search");
+		TextField searchfield = new TextField();
+		searchfield.setPlaceholder("Filter the result");
 		searchfield.addValueChangeListener(e -> filterList(searchfield.getValue()));
+		searchfield.setValueChangeMode(ValueChangeMode.LAZY);
+
+		Button clear = new Button(VaadinIcons.CLOSE);
+		clear.addClickListener(e -> searchfield.clear());
 
 		grid.addColumn(Customer::getFirstName).setCaption("First name");
 		grid.addColumn(Customer::getLastName).setCaption("Last name");
@@ -44,7 +51,8 @@ public class MyUI extends UI {
 
 		updateList();
 
-		layout.addComponents(refresh, searchfield, grid);
+		toolbar.addComponents(searchfield, clear);
+		layout.addComponents(toolbar, grid);
 		setContent(layout);
 	}
 
