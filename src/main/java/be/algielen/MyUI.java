@@ -11,11 +11,12 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window
@@ -35,7 +36,8 @@ public class MyUI extends UI {
 	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
 
-		final HorizontalLayout toolbar = new HorizontalLayout();
+		CssLayout filter = new CssLayout();
+		filter.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
 
 		TextField searchfield = new TextField();
 		searchfield.setPlaceholder("Filter the result");
@@ -51,8 +53,8 @@ public class MyUI extends UI {
 
 		updateList();
 
-		toolbar.addComponents(searchfield, clear);
-		layout.addComponents(toolbar, grid);
+		filter.addComponents(searchfield, clear);
+		layout.addComponents(filter, grid);
 		setContent(layout);
 	}
 
