@@ -43,14 +43,49 @@ public class MyUI extends UI {
 		CssLayout filter = new CssLayout();
 		filter.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
 
-		TextField searchfield = new TextField();
-		searchfield.setPlaceholder("Filter the result");
-		searchfield.addValueChangeListener(e -> filterList(searchfield.getValue()));
-		searchfield.setValueChangeMode(ValueChangeMode.LAZY);
+		TextField searchField = setupSearchField();
 
 		Button clear = new Button(VaadinIcons.CLOSE);
-		clear.addClickListener(e -> searchfield.clear());
+		clear.addClickListener(e -> searchField.clear());
 
+		setupGrid();
+
+		updateList();
+
+		Button addCustomerButton = setupAddButton();
+
+		filter.addComponents(searchField, clear);
+
+		HorizontalLayout main = new HorizontalLayout(grid, form);
+		form.setVisible(false);
+		main.setSizeFull();
+		grid.setSizeFull();
+		main.setExpandRatio(grid, 1);
+
+		toolbar.addComponents(filter, addCustomerButton);
+		layout.addComponents(toolbar, main);
+		setContent(layout);
+	}
+
+	private TextField setupSearchField() {
+		TextField searchField = new TextField();
+		searchField.setPlaceholder("Filter the result");
+		searchField.addValueChangeListener(e -> filterList(searchField.getValue()));
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
+		return searchField;
+	}
+
+	private Button setupAddButton() {
+		Button addCustomerButton = new Button("Add customer");
+		addCustomerButton.addClickListener(event -> {
+			grid.asSingleSelect().clear();
+			form.setCustomer(new Customer());
+		});
+		addCustomerButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+		return addCustomerButton;
+	}
+
+	private void setupGrid() {
 		grid.addColumn(Customer::getFirstName).setCaption("First name");
 		grid.addColumn(Customer::getLastName).setCaption("Last name");
 		grid.addColumn(Customer::getEmail).setCaption("Email");
@@ -62,27 +97,6 @@ public class MyUI extends UI {
 				form.setCustomer(event.getValue());
 			}
 		});
-
-		updateList();
-
-		Button addCustomerButton = new Button("Add customer");
-		addCustomerButton.addClickListener(event -> {
-			grid.asSingleSelect().clear();
-			form.setCustomer(new Customer());
-		});
-		addCustomerButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
-
-		filter.addComponents(searchfield, clear);
-
-		HorizontalLayout main = new HorizontalLayout(grid, form);
-		form.setVisible(false);
-		main.setSizeFull();
-		grid.setSizeFull();
-		main.setExpandRatio(grid, 1);
-
-		toolbar.addComponents(filter, addCustomerButton);
-		layout.addComponents(toolbar, main);
-		setContent(layout);
 	}
 
 	void updateList() {
