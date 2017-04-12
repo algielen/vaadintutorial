@@ -13,6 +13,7 @@ import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -32,10 +33,13 @@ public class MyUI extends UI {
 
 	private Grid<Customer> grid = new Grid<>();
 
+	private CustomerForm form = new CustomerForm(this);
+
 	@Override
 	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
 
+		HorizontalLayout toolbar = new HorizontalLayout();
 		CssLayout filter = new CssLayout();
 		filter.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
 
@@ -51,10 +55,33 @@ public class MyUI extends UI {
 		grid.addColumn(Customer::getLastName).setCaption("Last name");
 		grid.addColumn(Customer::getEmail).setCaption("Email");
 
+		grid.asSingleSelect().addValueChangeListener(event -> {
+			if (event.getValue() == null) {
+				form.setVisible(false);
+			} else {
+				form.setCustomer(event.getValue());
+			}
+		});
+
 		updateList();
 
+		Button addCustomerButton = new Button("Add customer");
+		addCustomerButton.addClickListener(event -> {
+			grid.asSingleSelect().clear();
+			form.setCustomer(new Customer());
+		});
+		addCustomerButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+
 		filter.addComponents(searchfield, clear);
-		layout.addComponents(filter, grid);
+
+		HorizontalLayout main = new HorizontalLayout(grid, form);
+		form.setVisible(false);
+		main.setSizeFull();
+		grid.setSizeFull();
+		main.setExpandRatio(grid, 1);
+
+		toolbar.addComponents(filter, addCustomerButton);
+		layout.addComponents(toolbar, main);
 		setContent(layout);
 	}
 
