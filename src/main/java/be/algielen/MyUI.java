@@ -89,6 +89,7 @@ public class MyUI extends UI {
 		grid.addColumn(Customer::getFirstName).setCaption("First name");
 		grid.addColumn(Customer::getLastName).setCaption("Last name");
 		grid.addColumn(Customer::getEmail).setCaption("Email");
+		grid.addColumn(Customer::getBirthDate).setCaption("Date of birth");
 
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			if (event.getValue() == null) {
